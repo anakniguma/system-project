@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .nav-btn {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Grade Management System</h1>
+            <p>Student Records & Performance Tracking</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="showSection('add')">➕ Add Student</button>
+            <button class="nav-btn" onclick="showSection('view')">👥 View All</button>
+            <button class="nav-btn" onclick="showSection('search')">🔍 Search</button>
+            <button class="nav-btn" onclick="showSection('update')">✏️ Update</button>
+            <button class="nav-btn" onclick="showSection('delete')">🗑️ Delete</button>
+            <button class="nav-btn" onclick="calculateAllGrades()">🧮 Calculate Grades</button>
+            <button class="nav-btn" onclick="showSection('stats')">📊 Statistics</button>
+            <button class="nav-btn" onclick="showSection('deans')">🏆 Dean's List</button>
+        </div>
+
+        <div class="content">
+            <!-- Add Student Section -->
+            <div id="add-section" class="section">
+                <h2>Add New Student</h2>
+                <form id="add-form" onsubmit="addStudent(event)">
+                    <div class="form-group">
+                        <label>Student ID:</label>
+                        <input type="number" id="add-id" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Student Name:</label>
+                        <input type="text" id="add-name" required>
+                    </div>
+                    <h3 style="margin: 20px 0;">Subject Grades (0-100)</h3>
+                    <div class="subjects-grid">
+                        <div class="form-group">
+                            <label>Intro to Computing:</label>
+                            <input type="number" id="add-s1" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>PC Troubleshooting:</label>
+                            <input type="number" id="add-s2" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Computer Programming 1:</label>
+                            <input type="number" id="add-s3" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Understanding the Self:</label>
+                            <input type="number" id="add-s4" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>NSTP:</label>
+                            <input type="number" id="add-s5" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Life and Works of Jose Rizal:</label>
+                            <input type="number" id="add-s6" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Philippine History with IPS:</label>
+                            <input type="number" id="add-s7" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>PATHFit 1:</label>
+                            <input type="number" id="add-s8" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>People and Earth's Ecosystem:</label>
+                            <input type="number" id="add-s9" min="0" max="100" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" style="margin-top: 20px;">Add Student</button>
+                </form>
+                <div id="add-message"></div>
+            </div>
+
+            <!-- View All Section -->
+            <div id="view-section" class="section">
+                <h2>All Students</h2>
+                <div id="view-content"></div>
+            </div>
+
+            <!-- Search Section -->
+            <div id="search-section" class="section">
+                <h2>Search Student</h2>
+                <div class="form-group">
+                    <label>Enter Student ID:</label>
+                    <input type="number" id="search-id">
+                </div>
+                <button class="btn" onclick="searchStudent()">Search</button>
+                <div id="search-result"></div>
+            </div>
+
+            <!-- Update Section -->
+            <div id="update-section" class="section">
+                <h2>Update Student Grades</h2>
+                <div class="form-group">
+                    <label>Enter Student ID:</label>
+                    <input type="number" id="update-search-id">
+                </div>
+                <button class="btn" onclick="loadStudentForUpdate()">Load Student</button>
+                <div id="update-form-container"></div>
+            </div>
+
+            <!-- Delete Section -->
+            <div id="delete-section" class="section">
+                <h2>Delete Student</h2>
+                <div class="form-group">
+                    <label>Enter Student ID:</label>
+                    <input type="number" id="delete-id">
+                </div>
+                <button class="btn btn-danger" onclick="deleteStudent()">Delete Student</button>
+                <div id="delete-message"></div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div id="stats-section" class="section">
+                <h2>Class Statistics</h2>
+                <div id="stats-content"></div>
+            </div>
+
+            <!-- Dean's List Section -->
+            <div id="deans-section" class="section">
+                <h2>Dean's List (GPA 1.0 - 1.75)</h2>
+                <div id="deans-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + '-section').classList.add('active');
+            
+            if (section === 'view') viewAllStudents();
+            if (section === 'stats') displayStatistics();
+            if (section === 'deans') displayDeansList();
+        }
+
+        function addStudent(e) {
+            e.preventDefault();
+            
+            const student = {
+                id: parseInt(document.getElementById('add-id').value),
+                name: document.getElementById('add-name').value,
+                grades: {
+                    introToComputing: parseFloat(document.getElementById('add-s1').value),
+                    pcTroubleshooting: parseFloat(document.getElementById('add-s2').value),
+                    computerProgramming1: parseFloat(document.getElementById('add-s3').value),
+                    understandingTheSelf: parseFloat(document.getElementById('add-s4').value),
+                    nstp: parseFloat(document.getElementById('add-s5').value),
+                    rizal: parseFloat(document.getElementById('add-s6').value),
+                    philippineHistory: parseFloat(document.getElementById('add-s7').value),
+                    pathfit1: parseFloat(document.getElementById('add-s8').value),
+                    peopleAndEarthEcosystem: parseFloat(document.getElementById('add-s9').value)
+                },
+                finalGrade: 0,
+                gpa: 0,
+                remarks: 'Not Calculated'
+            };
+
+            students.push(student);
+            document.getElementById('add-form').reset();
+            showMessage('add-message', 'Student added successfully!', 'success');
+        }
+
+        function calculateAllGrades() {
+            if (students.length === 0) {
+                alert('No students to calculate grades for!');
+                return;
+            }
+
+            students.forEach(student => {
+                const grades = student.grades;
+                student.finalGrade = (
+                    grades.introToComputing +
+                    grades.pcTroubleshooting +
+                    grades.computerProgramming1 +
+                    grades.understandingTheSelf +
+                    grades.nstp +
+                    grades.rizal +
+                    grades.philippineHistory +
+                    grades.pathfit1 +
+                    grades.peopleAndEarthEcosystem
+                ) / 9;
+
+                student.gpa = convertToGPA(student.finalGrade);
+                student.remarks = determineRemarks(student.gpa);
+            });
+
+            alert('Grades calculated for all students!');
+        }
+
+        function convertToGPA(grade) {
+            if (grade >= 97) return 1.0;
+            else if (grade >= 94) return 1.25;
+            else if (grade >= 91) return 1.5;
+            else if (grade >= 88) return 1.75;
+            else if (grade >= 85) return 2.0;
+            else if (grade >= 82) return 2.25;
+            else if (grade >= 79) return 2.5;
+            else if (grade >= 76) return 2.75;
+            else if (grade >= 75) return 3.0;
+            else return 5.0;
+        }
+
+        function determineRemarks(gpa) {
+            if (gpa >= 1.0 && gpa <= 1.75) return "DEAN'S LIST";
+            else if (gpa > 1.75 && gpa < 3.0) return "PASSED";
+            else if (gpa === 3.0) return "CONDITIONAL";
+            else return "FAILED";
+        }
+
+        function viewAllStudents() {
+            const content = document.getElementById('view-content');
+            
+            if (students.length === 0) {
+                content.innerHTML = '<p>No students in the system.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>ID</th><th>Name</th><th>Average</th><th>GPA</th><th>Remarks</th></tr>';
+            students.forEach(s => {
+                html += `<tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.finalGrade.toFixed(2)}</td>
+                    <td>${s.gpa.toFixed(2)}</td>
+                    <td>${s.remarks}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            content.innerHTML = html;
+        }
+
+        function searchStudent() {
+            const id = parseInt(document.getElementById('search-id').value);
+            const student = students.find(s => s.id === id);
+            const result = document.getElementById('search-result');
+
+            if (!student) {
+                result.innerHTML = '<div class="message error">Student not found!</div>';
+                return;
+            }
+
+            result.innerHTML = `
+                <div style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 10px;">
+                    <h3>Student Details</h3>
+                    <p><strong>ID:</strong> ${student.id}</p>
+                    <p><strong>Name:</strong> ${student.name}</p>
+                    <h4 style="margin-top: 20px;">Subject Grades:</h4>
+                    <p>Intro to Computing: ${student.grades.introToComputing}</p>
+                    <p>PC Troubleshooting: ${student.grades.pcTroubleshooting}</p>
+                    <p>Computer Programming 1: ${student.grades.computerProgramming1}</p>
+                    <p>Understanding the Self: ${student.grades.understandingTheSelf}</p>
+                    <p>NSTP: ${student.grades.nstp}</p>
+                    <p>Life and Works of Jose Rizal: ${student.grades.rizal}</p>
+                    <p>Philippine History with IPS: ${student.grades.philippineHistory}</p>
+                    <p>PATHFit 1: ${student.grades.pathfit1}</p>
+                    <p>People and Earth's Ecosystem: ${student.grades.peopleAndEarthEcosystem}</p>
+                    <h4 style="margin-top: 20px;">Performance:</h4>
+                    <p><strong>Average Grade:</strong> ${student.finalGrade.toFixed(2)}</p>
+                    <p><strong>GPA:</strong> ${student.gpa.toFixed(2)}</p>
+                    <p><strong>Remarks:</strong> ${student.remarks}</p>
+                </div>
+            `;
+        }
+
+        function loadStudentForUpdate() {
+            const id = parseInt(document.getElementById('update-search-id').value);
+            const student = students.find(s => s.id === id);
+            const container = document.getElementById('update-form-container');
+
+            if (!student) {
+                container.innerHTML = '<div class="message error">Student not found!</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="margin-top: 20px;">
+                    <h3>Updating grades for: ${student.name}</h3>
+                    <form id="update-form" onsubmit="updateStudent(event, ${id})">
+                        <div class="subjects-grid">
+                            <div class="form-group">
+                                <label>Intro to Computing:</label>
+                                <input type="number" id="up-s1" value="${student.grades.introToComputing}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>PC Troubleshooting:</label>
+                                <input type="number" id="up-s2" value="${student.grades.pcTroubleshooting}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Computer Programming 1:</label>
+                                <input type="number" id="up-s3" value="${student.grades.computerProgramming1}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Understanding the Self:</label>
+                                <input type="number" id="up-s4" value="${student.grades.understandingTheSelf}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>NSTP:</label>
+                                <input type="number" id="up-s5" value="${student.grades.nstp}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Life and Works of Jose Rizal:</label>
+                                <input type="number" id="up-s6" value="${student.grades.rizal}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Philippine History with IPS:</label>
+                                <input type="number" id="up-s7" value="${student.grades.philippineHistory}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>PATHFit 1:</label>
+                                <input type="number" id="up-s8" value="${student.grades.pathfit1}" min="0" max="100" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>People and Earth's Ecosystem:</label>
+                                <input type="number" id="up-s9" value="${student.grades.peopleAndEarthEcosystem}" min="0" max="100" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" style="margin-top: 20px;">Update Grades</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function updateStudent(e, id) {
+            e.preventDefault();
+            const student = students.find(s => s.id === id);
+
+            student.grades = {
+                introToComputing: parseFloat(document.getElementById('up-s1').value),
+                pcTroubleshooting: parseFloat(document.getElementById('up-s2').value),
+                computerProgramming1: parseFloat(document.getElementById('up-s3').value),
+                understandingTheSelf: parseFloat(document.getElementById('up-s4').value),
+                nstp: parseFloat(document.getElementById('up-s5').value),
+                rizal: parseFloat(document.getElementById('up-s6').value),
+                philippineHistory: parseFloat(document.getElementById('up-s7').value),
+                pathfit1: parseFloat(document.getElementById('up-s8').value),
+                peopleAndEarthEcosystem: parseFloat(document.getElementById('up-s9').value)
+            };
+
+            alert('Grades updated! Remember to calculate final grades.');
+        }
+
+        function deleteStudent() {
+            const id = parseInt(document.getElementById('delete-id').value);
+            const index = students.findIndex(s => s.id === id);
+            
+            if (index === -1) {
+                showMessage('delete-message', 'Student not found!', 'error');
+                return;
+            }
+
+            if (confirm(`Delete ${students[index].name}?`)) {
+                students.splice(index, 1);
+                showMessage('delete-message', 'Student deleted successfully!', 'success');
+                document.getElementById('delete-id').value = '';
+            }
+        }
+
+        function displayStatistics() {
+            const content = document.getElementById('stats-content');
+            
+            if (students.length === 0) {
+                content.innerHTML = '<p>No students to display statistics for.</p>';
+                return;
+            }
+
+            let highest = students[0].finalGrade;
+            let lowest = students[0].finalGrade;
+            let sum = 0;
+            let passed = 0;
+            let failed = 0;
+
+            students.forEach(s => {
+                if (s.finalGrade > highest) highest = s.finalGrade;
+                if (s.finalGrade < lowest) lowest = s.finalGrade;
+                sum += s.finalGrade;
+                if (s.gpa <= 3.0) passed++;
+                else failed++;
+            });
+
+            const average = sum / students.length;
+            const passRate = (passed / students.length) * 100;
+
+            content.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>${students.length}</h3>
+                        <p>Total Students</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${highest.toFixed(2)}</h3>
+                        <p>Highest Grade</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${lowest.toFixed(2)}</h3>
+                        <p>Lowest Grade</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${average.toFixed(2)}</h3>
+                        <p>Average Grade</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${passed}</h3>
+                        <p>Passed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${failed}</h3>
+                        <p>Failed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${passRate.toFixed(2)}%</h3>
+                        <p>Pass Rate</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayDeansList() {
+            const content = document.getElementById('deans-content');
+            const deansList = students.filter(s => s.gpa >= 1.0 && s.gpa <= 1.75);
+
+            if (deansList.length === 0) {
+                content.innerHTML = '<p>No students in the Dean\'s List.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>ID</th><th>Name</th><th>Average</th><th>GPA</th></tr>';
+            deansList.forEach(s => {
+                html += `<tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.finalGrade.toFixed(2)}</td>
+                    <td>${s.gpa.toFixed(2)}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            html += `<p style="margin-top: 20px;"><strong>Total: ${deansList.length} student(s)</strong></p>`;
+            content.innerHTML = html;
+        }
+
+        function showMessage(id, message, type) {
+            const el = document.getElementById(id);
+            el.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => el.innerHTML = '', 3000);
+        }
+
+        // Show add section by default
+        showSection('add');
+    </script>
+</body>
+</html>
